@@ -2,11 +2,20 @@ import './App.css';
 import React from 'react';
 import { useState } from 'react'
 
-function Input({ label, id, type, handler, number }) {
+class InputFieldData {
+    constructor(label, name, type, handler) {
+        this.label = label;
+        this.name = name;
+        this.type = type;
+        this.handler = handler;
+    }
+}
+
+function Input({ inputFieldData, index }) {
     return (
         <div className="input-field">
-            <p className="label standard-font">{label}</p>
-            <input required className="input" type={type} id={id} onChange={(e) => handler(e.target.value, number)}/>
+            <p className="label standard-font">{inputFieldData.label}</p>
+            <input required className="input" type={inputFieldData.type} name={inputFieldData.name} onInput={(e) => inputFieldData.handler(e.target.value, index)}/>
         </div>
     );
 }
@@ -23,15 +32,29 @@ function Button({ isDisabled }) {
 }
 
 function Registration() {
-    const [correctInputs, setCorrectInputs] = useState(new Array(5).fill(false));
     const [disabled, setDisabled] = useState(true);
 
-    const handle = (text, number) => {
+    const handle = (text, index, predicate) => {
         let newArray = correctInputs;
-        newArray[number] = text.length !== 0;
+        newArray[index] = predicate;
         setCorrectInputs(newArray);
         setDisabled(correctInputs.some((x) => !x));
     };
+
+    let inputsData = [
+        new InputFieldData("Почта", "post", "text",
+            (text, index) => handle(text, index, text.length !== 0)), // условие может быть любым, для примера сделал проверку на пустую строку
+        new InputFieldData("Логин", "login", "text",
+            (text, index) => handle(text, index, text.length !== 0)),
+        new InputFieldData("Пароль", "password", "password",
+            (text, index) => handle(text, index, text.length !== 0)),
+        new InputFieldData("Возраст", "age", "number",
+            (text, index) => handle(text, index, text.length !== 0)),
+        new InputFieldData("Страна проживания", "country", "text",
+            (text, index) => handle(text, index, text.length !== 0))
+    ];
+
+    const [correctInputs, setCorrectInputs] = useState(new Array(inputsData.length).fill(false));
 
   return (
     <div id="container">
@@ -40,11 +63,10 @@ function Registration() {
                 <h1 id="registration-header">Регистрация</h1>
             </div>
             <form method="POST">
-                <Input label={"Почта"} id={"post"} type={"text"} handler={handle} number={0}/>
-                <Input label={"Логин"} id={"login"} type={"text"} handler={handle} number={1}/>
-                <Input label={"Пароль"} id={"password"} type={"password"} handler={handle} number={2}/>
-                <Input label={"Возраст"} id={"age"} type={"number"} handler={handle} number={3}/>
-                <Input label={"Страна проживания"} id={"country"} type={"text"} handler={handle} number={4}/>
+                {
+                    inputsData.map((value, index) =>
+                    <Input inputFieldData={value} index={index} key={index}/>)
+                }
                 <Button isDisabled={disabled}/>
             </form>
         </div>
