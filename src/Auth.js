@@ -1,77 +1,134 @@
 import './Auth.css';
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useState } from 'react'
+import {client} from "./App";
 
 class InputFieldData {
-    constructor(label, name, type, handler) {
+    constructor(label, name, type, value, setValue) {
         this.label = label;
         this.name = name;
         this.type = type;
-        this.handler = handler;
+        this.value = value;
+        this.setValue = setValue;
     }
 }
 
-function Input({ inputFieldData, index }) {
+function Input({ inputFieldData }) {
     return (
         <div className="input-field">
             <p className="label standard-font">{inputFieldData.label}</p>
-            <input required className="input" type={inputFieldData.type} name={inputFieldData.name} onInput={(e) => inputFieldData.handler(e.target.value, index)}/>
+            <input required className="input" type={inputFieldData.type} name={inputFieldData.name} onInput={(e) => {
+                inputFieldData.setValue(e.target.value);
+            }} value={inputFieldData.value}/>
         </div>
     );
 }
 
-function Button({ isDisabled }) {
+function Button({ isDisabled, text }) {
     return (
         <div>
             {isDisabled ?
-                <button disabled className="input button input-field standard-font primary-button" id="registration-button" type="submit">Зарегистрироваться</button> :
-                <button className="input button input-field standard-font primary-button" id="registration-button" type="submit">Зарегистрироваться</button>
+                <button disabled className="input button input-field standard-font primary-button" id="auth-button" type="submit">{text}</button> :
+                <button className="input button input-field standard-font primary-button" id="auth-button" type="submit">{text}</button>
             }
         </div>
     );
 }
 
-function Registration() {
-    const [disabled, setDisabled] = useState(true);
+function Auth({setCurrentUser}) {
+    const [registrationToggle, setRegistrationToggle] = useState(false);
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
 
-    const handle = (text, index, predicate) => {
-        let newArray = correctInputs;
-        newArray[index] = predicate;
-        setCorrectInputs(newArray);
-        setDisabled(correctInputs.some((x) => !x));
+    useEffect(() => {
+        client.get("api/user")
+            .then(function (res) {
+                setCurrentUser(true);
+            }).catch(function (error) {
+                setCurrentUser(false);
+            });
+    }, []);
+
+    const login = (e) => {
+        e.preventDefault();
+        client.post(
+            "/api/login",
+            {
+                "email": email,
+                "password": password
+            }
+        ).then(function (res) {
+            setCurrentUser(true);
+        });
     };
 
-    let inputsData = [
-        new InputFieldData("Почта", "post", "text",
-            (text, index) => handle(text, index, text.length !== 0)), // условие может быть любым, для примера сделал проверку на пустую строку
-        new InputFieldData("Логин", "login", "text",
-            (text, index) => handle(text, index, text.length !== 0)),
-        new InputFieldData("Пароль", "password", "password",
-            (text, index) => handle(text, index, text.length !== 0)),
-        new InputFieldData("Возраст", "age", "number",
-            (text, index) => handle(text, index, text.length !== 0)),
-        new InputFieldData("Страна проживания", "country", "text",
-            (text, index) => handle(text, index, text.length !== 0))
-    ];
+    const submitRegistration = (e) => {
+        e.preventDefault();
+        client.post(
+            "/api/register",
+            {
+                "email": email,
+                "username": username,
+                "password": password
+            }
+        ).then(function (res) {
+            login(e);
+        });
+    };
 
-    const [correctInputs, setCorrectInputs] = useState(new Array(inputsData.length).fill(false));
-
-  return (
-    <div className="container">
-        <div className="vertical-center">
-            <div>
-                <h1 id="registration-header">Регистрация</h1>
+    if (registrationToggle) { // Регистрация
+        const disabled = () => {
+            return email.length === 0 || password.length === 0 || username.length === 0;
+        };
+        let inputsData = [
+            new InputFieldData("Почта", "email", "text", email, setEmail),
+            new InputFieldData("Логин", "username", "text", username, setUsername),
+            new InputFieldData("Пароль", "password", "password", password, setPassword)
+        ];
+        return (
+            <div className="container">
+                <div className="vertical-center">
+                    <div>
+                        <h1 id="auth-header">Регистрация</h1>
+                    </div>
+                    <form method="POST" onSubmit={(e) => submitRegistration(e)}>
+                        {
+                            inputsData.map((value, index) =>
+                                <Input inputFieldData={value} index={index} key={index}/>)
+                        }
+                        <Button isDisabled={disabled()} text={"Зарегистрироваться"}/>
+                    </form>
+                    <button onClick={() => setRegistrationToggle(false)}>Войти</button>
+                </div>
             </div>
-            <form method="POST">
-                {
-                    inputsData.map((value, index) =>
-                    <Input inputFieldData={value} index={index} key={index}/>)
-                }
-                <Button isDisabled={disabled}/>
-            </form>
-        </div>
-    </div>
-  );
+        );
+    } else { // Авторизация
+        const disabled = () => {
+            return password.length === 0 || email.length === 0;
+        };
+        let inputsData = [
+            new InputFieldData("Почта", "email", "text", email, setEmail),
+            new InputFieldData("Пароль", "password", "password", password, setPassword)
+        ];
+        return (
+            <div className="container">
+                <div className="vertical-center">
+                    <div>
+                        <h1 id="auth-header">Вход</h1>
+                    </div>
+                    <form method="POST" onSubmit={(e) => login(e)}>
+                        {
+                            inputsData.map((value, index) =>
+                                <Input inputFieldData={value} index={index} key={index}/>)
+                        }
+                        <Button isDisabled={disabled()} text={"Войти"}/>
+                    </form>
+                    <button onClick={() => setRegistrationToggle(true)}>Зарегистрироваться</button>
+                </div>
+            </div>
+        );
+    }
 }
 
-export default Registration;
+export default Auth;
