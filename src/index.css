@@ -24,3 +24,58 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.button {
+  cursor: pointer;
+}
+
+.standard-font {
+  line-height: var(--standard-line-height);
+  font-size: var(--standard-font-size);
+}
+
+.container {
+  width: 341px;
+  margin: 0 auto;
+  height: 100vh;
+}
+
+.vertical-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.input {
+  border-radius: 7px;
+  border: none;
+  outline: none;
+  height: 39px;
+}
+
+.input-field {
+  margin-top: 23px;
+}
+
+.input-field input {
+  background-color: var(--input-field-background-color);
+  padding: 0 15px;
+  width: 100%;
+  box-sizing: border-box;
+  letter-spacing: 1px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.primary-button {
+  background: var(--primary-color);
+  color: white;
+  letter-spacing: .5px;
+}
+
+.primary-button:disabled {
+  background: var(--input-field-background-color);
+}

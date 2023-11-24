@@ -1,0 +1,18 @@
+#registration-header {
+    font-family: var(--primary-font);
+    font-size: var(--header-font-size);
+    line-height: var(--header-line-height);
+    text-align: center;
+    width: 100%;
+}
+
+.label {
+    letter-spacing: 0.25px;
+    font-family: var(--secondary-font);
+    padding-left: 7px;
+    padding-bottom: 6px;
+}
+
+#registration-button {
+    width: 100%;
+}

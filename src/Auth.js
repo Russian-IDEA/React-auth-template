@@ -1,4 +1,4 @@
-import './App.css';
+import './Auth.css';
 import React from 'react';
 import { useState } from 'react'
 
@@ -57,8 +57,8 @@ function Registration() {
     const [correctInputs, setCorrectInputs] = useState(new Array(inputsData.length).fill(false));
 
   return (
-    <div id="container">
-        <div id="vertical-center">
+    <div className="container">
+        <div className="vertical-center">
             <div>
                 <h1 id="registration-header">Регистрация</h1>
             </div>
